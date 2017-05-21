@@ -1,68 +1,33 @@
-import edu.stanford.nlp.coref.CorefCoreAnnotations;
-import edu.stanford.nlp.coref.data.CorefChain;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.util.CoreMap;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.io.IOException;
 
 /**
  * Created by paulomenezes on 10/05/17.
  */
 public class main {
-    public static void main(String[] args) {
-        Properties props = new Properties();
-        props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
-        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    public static void main(String[] args) throws IOException {
+        String text= "The use of artificial intelligence and procedural content generation algorithms in mixed reality games is an un- explored space. We posit that these algorithms can en- hance the gameplay experience in mixed reality games. We present two prototype games that use procedural content generation to design levels that make use of the affordances in the players physical environment. The levels produced can be tailored to a user, customizing gameplay difficulty and affecting how the player moves around the real-world environment.";
 
-        // read some text in the text variable
-        String text = "Have you met Ted?";
+        EnglishPLN pln = new EnglishPLN();
 
-        // create an empty Annotation just with the given text
-        Annotation document = new Annotation(text);
+        System.out.println("Tokens");
+        pln.tokenize(text).forEach(System.out::println);
 
-        // run all Annotators on this text
-        pipeline.annotate(document);
+        System.out.println("\n\nSetences");
+        pln.ssplit(text).forEach(System.out::println);
 
-        List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
+        System.out.println("\n\nLemmas");
+        pln.lemmas(text).forEach(System.out::println);
 
-        for(CoreMap sentence: sentences) {
-            // traversing the words in the current sentence
-            // a CoreLabel is a CoreMap with additional token-specific methods
-            for (CoreLabel token: sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-                // this is the text of the token
-                String word = token.get(CoreAnnotations.TextAnnotation.class);
-                // this is the POS tag of the token
-                String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-                // this is the NER label of the token
-                String ne = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+        System.out.println("\n\nNER");
+        pln.ner(text).forEach(System.out::println);
 
-                System.out.println(word);
-                System.out.println(pos);
-                System.out.println(ne);
-            }
+        System.out.println("\n\nTree");
+        pln.tree(text).forEach(Node::print);
 
-            // this is the parse tree of the current sentence
-            Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+        System.out.println("\n\nRemove stopwords");
+        System.out.println(pln.removeStopwords(text));
 
-            // this is the Stanford dependency graph of the current sentence
-            SemanticGraph dependencies = sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
-        }
-
-// This is the coreference link graph
-// Each chain stores a set of mentions that link to each other,
-// along with a method for getting the most representative mention
-// Both sentence and token offsets start at 1!
-        Map<Integer, CorefChain> graph =
-                document.get(CorefCoreAnnotations.CorefChainAnnotation.class);
-
+        System.out.println("\n\nStemming");
+        pln.stemmer(text).forEach(System.out::println);
     }
 }
