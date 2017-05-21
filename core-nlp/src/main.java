@@ -24,6 +24,9 @@ public class main {
         System.out.println("\n\nTree");
         pln.tree(text).forEach(Node::print);
 
+        System.out.println("\n\nTree 2");
+        pln.tree2(text).forEach(System.out::println);
+
         System.out.println("\n\nRemove stopwords");
         System.out.println(pln.removeStopwords(text));
 

@@ -1,15 +1,20 @@
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -124,6 +129,21 @@ class EnglishPLN {
         return node;
     }
 
+    List<Tree> tree2(String text) {
+        Annotation document = new Annotation(text);
+
+        pipeline.annotate(document);
+
+        List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
+
+        List<Tree> nodeTree = new ArrayList<>();
+        for (CoreMap sentence : sentences) {
+            nodeTree.add(sentence.get(TreeCoreAnnotations.TreeAnnotation.class));
+        }
+
+        return nodeTree;
+    }
+
     String removeStopwords(String text) throws IOException {
         Annotation document = new Annotation(text);
         pipeline.annotate(document);
@@ -156,19 +176,19 @@ class EnglishPLN {
 
     List<String> stemmer(String text) {
         Annotation document = new Annotation(text);
-        Potter potter = new Potter();
 
         pipeline.annotate(document);
 
         List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
 
-        List<String> tokens = new ArrayList<>();
+        Stemmer s = new Stemmer();
+        List<String> stemming = new ArrayList<>();
         for (CoreMap sentence : sentences) {
             for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-                tokens.add(potter.process(token.word().toLowerCase()));
+                stemming.add(s.stem(token.word()));
             }
         }
 
-        return tokens;
+        return stemming;
     }
 }
